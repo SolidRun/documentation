@@ -220,3 +220,33 @@ These tests can be disabled by adding kernel argument `cryptomgr.notests`:
    Taking backup of boot.scr.
    Installing new boot.scr.
    ```
+
+### Install "amdgpu" Firmware
+
+Note: Desktop-class GPUs by AMD and NVIDIA are not currently supported well on AArch64, success may vary.
+
+Recent AMD graphics card using the modern "amdgpu" kernel driver require proprietary firmware.
+The kernel may indicate this by the message below:
+
+    sudo dmesg | grep amdgpu
+    [    4.297767] [drm:amdgpu_pci_probe [amdgpu]] *ERROR* amdgpu requires firmware installed
+    [    4.306038] amdgpu: See https://wiki.debian.org/Firmware for information about missing firmware
+
+1. Add "non-free-firmware" component to `/etc/apt/sources.list`, e.g.:
+
+       deb http://deb.debian.org/debian/ bookworm main non-free-firmware
+
+       deb-src http://deb.debian.org/debian/ bookworm main non-free-firmware
+
+       deb http://security.debian.org/debian-security bookworm-security main non-free-firmware
+       deb-src http://security.debian.org/debian-security bookworm-security main non-free-firmware
+
+       # bookworm-updates, to get updates before a point release is made;
+       # see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+       deb http://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+       deb-src http://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+
+2. Install "firmware-amd-graphics" package:
+
+       sudo apt-get update
+       sudo apt-get install firmware-amd-graphics
