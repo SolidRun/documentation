@@ -250,3 +250,87 @@ The kernel may indicate this by the message below:
 
        sudo apt-get update
        sudo apt-get install firmware-amd-graphics
+
+### Support large BARs for PCI-E
+
+Some PCI devices such as machine-learning accelerators or graphics cards request large PCI bars.
+The default configuration of Linux for LX2160A is limited to 1GB of 32-bit memory.
+
+See below a typical kernel error message encountered with a Radeon Pro WX2100:
+
+    [    1.002255] pci 0001:00:00.0: BAR 13: no space for [io  size 0x1000]
+    [    1.002259] pci 0001:00:00.0: BAR 13: failed to assign [io  size 0x1000]
+
+There is a [patch for device-tree posted as RFC](https://lore.kernel.org/r/20240429-lx2160-pci-v2-1-1b94576d6263@solid-run.com) to support 3GB of 32-bit memory, plus 16GB of 64-bit memory which can be applied manually by customizing device-tree files used by Debian:
+
+2. Determine Kernel Version:
+
+       uname -v
+       #1 SMP Debian 6.1.85-1 (2024-04-11)
+
+   Here Kernel is v6.1.85, for other versions substitute in the following steps accordingly.
+
+2. Patch matching Kernel Sources and rebuild Device-Tree:
+
+   **Note this step may be performed on any debian based linux pc or on lx2160a, whichever is convenient.**
+
+       sudo apt-get update
+       sudo apt-get install bison build-essential flex git
+
+       git config --global user.name "<insert name>"
+       git config --global user.email "<insert email address>"
+
+       git clone https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux.git
+       cd linux
+       git checkout -b linux-6.1.y origin/linux-6.1.y
+       git reset --hard v6.1.85
+
+       wget -O bars.patch https://lore.kernel.org/all/20240429-lx2160-pci-v2-1-1b94576d6263@solid-run.com/raw
+       git am -3 bars.patch
+
+       make ARCH=arm64 defconfig
+       make freescale/fsl-lx2160a-clearfog-cx.dtb
+       make freescale/fsl-lx2160a-honeycomb.dtb
+
+       # finally copy the patched DTBs to home directory
+       cp -v arch/arm64/boot/dts/freescale/*.dtb ~/
+
+3. Install patched DTB to target system:
+
+   Copy patched DTBs to `/etc/flash-kernel/dtbs/` where `flash-kernel` command looks for custom DTBs
+   which will be preferred over those shipped with the kernel package:
+
+       sudo cp -v ~/*.dtb /etc/flash-kernel/dtbs/
+
+   Regenerate boot-files:
+
+       sudo flash-kernel
+
+   When successfull the last command will log copying of patched DTB, e.g.:
+
+       ...
+       Installing /etc/flash-kernel/dtbs/fsl-lx2160a-honeycomb.dtb into /boot/dtbs/6.1.0-20-arm64/freescale/fsl-lx2160a-honeycomb.dtb
+       ...
+
+Reboot system to apply the changes.
+
+### Avoid visual glitches with X11 and amdgpu
+
+When using X11 with amd graphics cards there can be visual glitches and performance problems in default configuration.
+
+Creating `/etc/drirc` with the settings below seems to provide good results:
+
+```
+<driconf>
+    <!-- Please always enable app-specific workarounds for all drivers and
+         screens. -->
+    <device>
+        <application name="XWayland" executable="Xwayland">
+            <option name="mesa_extension_override" value="-GL_ARB_buffer_storage" />
+        </application>
+        <application name="Xorg" executable="Xorg">
+            <option name="mesa_extension_override" value="-GL_ARB_buffer_storage" />
+        </application>
+    </device>
+</driconf>
+```
