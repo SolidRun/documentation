@@ -127,6 +127,8 @@ Finally boot the new system by either pressing the reset button, or using the `b
 
 ### Enable Fan-Controller
 
+**Note: Bugfix has been applied and is included in Debian since 6.1.0-20-arm64 (Linux 6.1.84+)**
+
 If the system overheats at the default low fan-speed under load,
 likely the fan-controller driver wasn't loaded automatically.
 After loading the driver, fan-speed should dynamically follow cpu temperature:
