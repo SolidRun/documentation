@@ -1,3 +1,7 @@
+## Download Binaries
+
+We are automatically building binaries whenever code is pushed to our [U-Boot repository on github](https://github.com/SolidRun/u-boot/tree/v2024.04-solidrun-a38x). Please find the results at https://images.solid-run.com/A38X/U-Boot.
+
 ## Installing automatically (SPI, eMMC, M.2 SSD)
 
 **This section assumes that you already have a version of U-Boot >= 2018.01 running on your device! If not, there are two options:**
@@ -9,19 +13,20 @@ First prepare an sdcard or usb-drive with the u-boot binary that you want to ins
 
 Now drop to the U-Boot console and run one of these update commands (you might have to substitute the file names \*.kwb by the actual names on your drive):
 
-    # To install u-boot-spl-spi.kwb from sdcard to spi:
-    bubt u-boot-spl-spi.kwb spi mmc
-    # To install u-boot-spl-spi.kwb from usb to spi
-    bubt u-boot-spl-spi.kwb spi usb
-    # To install u-boot-spl-mmc.kwb from usb to emmc
-    bubt u-boot-spl-mmc.kwb mmc usb
-    # To install u-boot-spl-sata.kwb from usb to m.2 ssd
-    bubt u-boot-spl-sata.kwb sata usb
-    # To install u-boot-spl-sata.kwb from emmc/sdcard to m.2 ssd
-    bubt u-boot-spl-sata.kwb sata mmc
-
+    # To install u-boot-clearfog-pro-spi.kwb from sdcard to spi:
+    bubt u-boot-clearfog-pro-spi.kwb spi mmc
+    # To install u-boot-clearfog-pro-spi.kwb from usb to spi
+    bubt u-boot-clearfog-pro-spi.kwb spi usb
+    # To install u-boot-clearfog-pro-mmc.kwb from usb to emmc
+    bubt u-boot-clearfog-pro-mmc.kwb mmc usb
+    # To install u-boot-clearfog-pro-sata.kwb from usb to m.2 ssd
+    bubt u-boot-clearfog-pro-sata.kwb sata usb
+    # To install u-boot-clearfog-pro-sata.kwb from emmc/sdcard to m.2 ssd
+    bubt u-boot-clearfog-pro-sata.kwb sata mmc
 
 **Warning: bubt does not take care of GPT yet. When installing u-boot to sdcard, sata or emmc data partition, an existing GPT will be broken!**
+
+**Warning: bubt support for eMMC boot0/boot1 is limited, new version will be written to same partition as running version!**
 
 **Note: You can configure where u-boot will be installed to on eMMC, the choices are the data partition, boot0 and boot1. Please refer to [this section](#configure-emmc-boot-partition) for instructions.**
 
@@ -40,27 +45,27 @@ For the purpose of these instructions we make the following assumptions:
 | 192.168.1.1 |	TFTP server |
 | 192.168.1.20 | IP to be used with the clearfog board |
 | 255.255.255.0	| netmask of the network |
-| /u-boot-spl-sata.kwb | name and path of the U-Boot binary on the tftp server |
+| /u-boot-clearfog-pro-sata.kwb | name and path of the U-Boot binary on the tftp server |
 
 First power on the device, then “Hit any key to stop autoboot” on the UART console. Finally use below commands to install U-Boot from TFTP to M.2 SSD. Pick the right section for your network setup. Also note that below sata can be replaced by mmc(for sdcard/eMMC) or spi for installing to those.
 
 ### With DHCP and BOOTP
 
     dhcp
-    bubt u-boot-spl-sata.kwb sata tftp
+    bubt u-boot-clearfog-pro-sata.kwb sata tftp
 
 ### With DHCP only
 
     dhcp
     setenv serverip 192.168.1.1
-    bubt u-boot-spl-sata.kwb sata tftp
+    bubt u-boot-clearfog-pro-sata.kwb sata tftp
 
 ### Manually
 
     setenv ipaddr 192.168.1.20
     setenv netmask 255.255.255.0
     setenv serverip 192.168.1.1
-    bubt u-boot-spl-sata.kwb sata tftp
+    bubt u-boot-clearfog-pro-sata.kwb sata tftp
 
 ## Installing manually
 
@@ -70,7 +75,7 @@ First power on the device, then “Hit any key to stop autoboot” on the UART c
 
 The BootROM searches for U-Boot after the first 512 bytes, so use the dd command to write u-boot to this location on your microSD card. Substitute sdX by the device node of your sdcard.
 
-    dd if=u-boot-spl-sdhc.kwb of=/dev/sdX bs=512 seek=1 conv=sync
+    dd if=u-boot-clearfog-pro-sd.kwb of=/dev/sdX bs=512 seek=1 conv=sync
 
 **Note: Take your time while identifying where your designated SD-Card is mapped on your linux system. Failure to do so can result in overwriting an arbitrary disk on your system!**
 
@@ -80,7 +85,7 @@ The BootROM searches for U-Boot after the first 512 bytes, so use the dd command
 
 The BootROM searches for U-Boot after the first 512 bytes, so use the dd command to write u-boot to this location on your SSD. Substitute sdX by the device node of your target SSD.
 
-    dd if=u-boot-spl-sata.kwb of=/dev/sdX bs=512 seek=1 conv=sync
+    dd if=u-boot-clearfog-pro-sata.kwb of=/dev/sdX bs=512 seek=1 conv=sync
 
 **Note: Take your time while identifying where your designated SSD is mapped on your linux system. Failure to do so can result in overwriting an arbitrary disk on your system!**
 
@@ -95,7 +100,7 @@ The BootROM loads U-boot from the start of SPI flash, offset=0. U-Boot expects t
 
 Drop to the U-Boot console, and execute these command for loading the u-boot binary to memory, and then writing it to the spi flash. This sample only covers eMMC/sdcard partition 1 as **source**, but network or usb are also usable.
 
-    ext4load mmc 0:1 0x200000 /u-boot-spl-spi.kwb
+    ext4load mmc 0:1 0x200000 /u-boot-clearfog-pro-spi.kwb
     sf probe
     # you may want to erase the first 1M, or just the environment:
     # sf erase 0 0x100000
@@ -115,7 +120,7 @@ Place the appropriate U-Boot binary **built for eMMC data partition** on a USB d
 Then execute the following commands for loading u-boot to memory, and then writing it to the eMMC. Note that alternatively the u-boot binary can also be loaded from the network, sata drive or eMMC.
 
     usb start
-    load usb 0:1 0x200000 /u-boot-spl-emmc.kwb
+    load usb 0:1 0x200000 /u-boot-clearfog-pro-emmc.kwb
     setexpr nblocks 0x$filesize + 0x1ff
     setexpr nblocks 0x$nblocks / 0x200
     mmc write 0x200000 0x1000 0x$nblocks
@@ -126,63 +131,50 @@ Finally configure the eMMC Boot partition accordinglya as outlined in the next s
 
 ### eMMC (boot0 partition)
 
-Currently not supported.
-
-<s>
 **This section assumes that you already have a version of U-Boot >= 2018.01 running on your device! If not, there are two options:**
 
 1. Install U-Boot to SATA (m.2) ssd first
 2. Boot from UART ([booting from uart](#booting-from-uart))
-
-The BootROM loads U-Boot from either sector 0 or 4096. Sector 0 conflicts with MBR (i.e. standard partitions can not be created) - therefore 4096 is used.
-Environment lives at sectors 1920-2048. Note there may be conflicts with standard partitions if they start before sector 8192.
 
 Place the appropriate U-Boot binary **built for eMMC boot0 partition** on a USB drive formatted with fat32 or ext4.
 Then execute the following commands for loading u-boot to memory, and then writing it to the eMMC. Note that alternatively the u-boot binary can also be loaded from the network, sata drive or eMMC.
 
     usb start
-    load usb 0:1 0x200000 /u-boot-spl-emmc-boot0.kwb
+    load usb 0:1 0x200000 /u-boot-clearfog-pro-emmc-boot0.kwb
     setexpr nblocks 0x$filesize + 0x1ff
     setexpr nblocks 0x$nblocks / 0x200
     mmc dev 0 1
-    mmc write 0x200000 0x1000 0x$nblocks
+    mmc write 0x200000 0x0 0x$nblocks
     # you may want to erase the environment:
     # mmc erase 0x780 0x80
 
-Finally configure the eMMC Boot partition accordinglya as outlined in the next section.
-</s>
+Finally configure the eMMC Boot partition accordingly as outlined in the next section.
 
 ### eMMC (boot1 partition)
 
-Currently not supported.
-
-<s>
 **This section assumes that you already have a version of U-Boot >= 2018.01 running on your device! If not, there are two options:**
 
 1. Install U-Boot to SATA (m.2) ssd first
 2. Boot from UART ([booting from uart](#booting-from-uart))
 
-The BootROM loads U-Boot from either sector 0 or 4096. Sector 0 conflicts with MBR (i.e. standard partitions can not be created) - therefore 4096 is used.
-Environment lives at sectors 1920-2048. Note there may be conflicts with standard partitions if they start before sector 8192.
-
 Place the appropriate U-Boot binary **built for eMMC boot1 partition** on a USB drive formatted with fat32 or ext4.
 Then execute the following commands for loading u-boot to memory, and then writing it to the eMMC. Note that alternatively the u-boot binary can also be loaded from the network, sata drive or eMMC.
 
     usb start
-    load usb 0:1 0x200000 /u-boot-spl-emmc-boot1.kwb
+    load usb 0:1 0x200000 /u-boot-clearfog-pro-emmc-boot1.kwb
     setexpr nblocks 0x$filesize + 0x1ff
     setexpr nblocks 0x$nblocks / 0x200
     mmc dev 0 2
-    mmc write 0x200000 0x1000 0x$nblocks
+    mmc write 0x200000 0x0 0x$nblocks
     # you may want to erase the environment:
     # mmc erase 0x780 0x80
 
-Finally configure the eMMC Boot partition accordinglya as outlined in the next section.
-</s>
+Finally configure the eMMC Boot partition accordingly as outlined in the next section.
 
 ## Configure eMMC Boot Partition
 
-The previous section described how U-Boot can be installed to boot0. However there are also the options to install it on the data partition, or boot1.
+The previous sections described how U-Boot can be installed to various eMMC partitions.
+However the eMMC itself must also be configured for selecting the correct boot partition.
 
 Responsible for changing this setting is the **mmc partconf** command. It takes either 1, or 4 paramaters:
 
@@ -221,11 +213,11 @@ First configure the board to boot from UART. There are two options to do so:
 
 After connecting the serial uart to your PC using a micro-USB-cable, run this command to send U-Boot to the board for execution:
 
-    ./tools/kwboot -t -b u-boot-spl-uart.kwb -B 115200 /dev/ttyUSB0
+    ./tools/kwboot -t -b u-boot-clearfog-pro-uart.kwb -B 115200 /dev/ttyUSB0
 
 Now turn on, or reset the board. You should see output similar to the following after less than 10 seconds:
 
-    ./tools/kwboot -t -b u-boot-spl-uart.kwb -B 115200 /dev/ttyUSB2
+    ./tools/kwboot -t -b u-boot-clearfog-pro-uart.kwb -B 115200 /dev/ttyUSB0
     Sending boot message. Please reboot the target...\
     Sending boot image...
       0 % [......................................................................]
@@ -335,7 +327,7 @@ Now turn on, or reset the board. You should see output similar to the following 
 
 These are the instructions to fetch the code, and build a binary:
 
-    git clone --branch v2022.01-solidrun-a38x https://github.com/SolidRun/u-boot.git u-boot-clearfog
+    git clone --branch v2024.04-solidrun-a38x https://github.com/SolidRun/u-boot.git u-boot-clearfog
     cd u-boot-clearfog
     export CROSS_COMPILE=<Set toolchain prefix to your toolchain>
     # optionally add options to configs/clearfog_defconfig
@@ -344,85 +336,58 @@ These are the instructions to fetch the code, and build a binary:
     # make menuconfig
     make
 
-This will generate u-boot-spl.kwb to be used on the Clearfog Pro when booting from an sdcard. To target the Clearfog Base and/or other boot media, set the following options in *configs/clearfog_defconfig* or through menuconfig:
+This will generate u-boot-with-spl.kwb to be used on the Clearfog Pro when booting from an sdcard. To target the Clearfog Base and/or other boot media, substitute the configuration steps below:
 
 - Clearfog Pro (default)
 
-       CONFIG_TARGET_CLEARFOG=y
+       make clearfog_defconfig
 
 - Clearfog Base
 
-       # CONFIG_TARGET_CLEARFOG is not set
-       CONFIG_TARGET_CLEARFOG_BASE=y
+       make clearfog_defconfig
+       ./scripts/config --enable TARGET_CLEARFOG_BASE
 
 - SD-Card (default)
 
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x0
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_DATA_PART_OFFSET=0x1
+       make clearfog_defconfig
 
 - eMMC (data partition)
 
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x0
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_DATA_PART_OFFSET=0x1000
+       make clearfog_defconfig
+       ./scripts/config --set-val SYS_MMCSD_RAW_MODE_U_BOOT_DATA_PART_OFFSET 0x1000
 
 - eMMC (boot0 partition)
 
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x0
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_DATA_PART_OFFSET=0x1000
-       # CONFIG_SPL_MMC is not set
-       CONFIG_SYS_MMC_ENV_PART=1
+       make clearfog_defconfig
+       ./scripts/config --set-val SYS_MMC_ENV_PART 1
 
 - eMMC (boot1 partition)
 
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x0
-       CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_DATA_PART_OFFSET=0x1000
-       # CONFIG_SPL_MMC is not set
-       CONFIG_SYS_MMC_ENV_PART=2
+       make clearfog_defconfig
+       ./scripts/config --set-val SYS_MMC_ENV_PART 2
 
 - M.2 SSD
 
-       # CONFIG_MVEBU_SPL_BOOT_DEVICE_MMC is not set
-       CONFIG_MVEBU_SPL_BOOT_DEVICE_SATA=y
-       # CONFIG_SPL_MMC is not set
-       CONFIG_SPL_SATA=y
-       SPL_SATA_RAW_U_BOOT_USE_SECTOR=y
-       SPL_SATA_RAW_U_BOOT_SECTOR=0x1
-       CONFIG_ENV_IS_NOWHERE=y
-       # CONFIG_ENV_IS_IN_MMC is not set
+       make clearfog_sata_defconfig
 
 - SPI
 
-       CONFIG_MVEBU_SPL_BOOT_DEVICE_SPI=y
-       # CONFIG_MVEBU_SPL_BOOT_DEVICE_MMC is not set
-       # CONFIG_SPL_MMC is not set
-       CONFIG_SPL_SPI_FLASH_SUPPORT=y
-       CONFIG_SPL_SPI=y
-       CONFIG_SPL_SPI_FLASH_TINY=y
-       CONFIG_SPL_SPI_LOAD=y
-       CONFIG_SYS_SPI_U_BOOT_OFFS=0x0
-       # CONFIG_ENV_IS_IN_MMC is not set
-       CONFIG_ENV_IS_IN_SPI_FLASH=y
-       # CONFIG_ENV_SECT_SIZE_AUTO is not set
-       # CONFIG_USE_ENV_SPI_BUS is not set
-       # CONFIG_USE_ENV_SPI_CS is not set
-       # CONFIG_USE_ENV_SPI_MAX_HZ is not set
-       # CONFIG_USE_ENV_SPI_MODE is not set
-       # CONFIG_ENV_SPI_EARLY is not set
-       CONFIG_ENV_ADDR=0x0
+       make clearfog_spi_defconfig
 
 - UART
 
-       # CONFIG_MVEBU_SPL_BOOT_DEVICE_MMC is not set
-       CONFIG_MVEBU_SPL_BOOT_DEVICE_UART=y
-       # CONFIG_SPL_MMC is not set
-       CONFIG_ENV_IS_NOWHERE=y
-       # CONFIG_ENV_IS_IN_MMC is not set
+       make clearfog_defconfig
+       ./scripts/config --disable MVEBU_SPL_BOOT_DEVICE_MMC
+       ./scripts/config --disable ENV_IS_IN_MMC
+       ./scripts/config --disable SPL_MMC
+       ./scripts/config --enable MVEBU_SPL_BOOT_DEVICE_UART
+       ./scripts/config --enable ENV_IS_NOWHERE
 
 **Note: The resulting binaries share the same filename regardless of configuration.**
 
 ## Reconfigure PCIe as SATA, and SFP speed
 
-These settings are exposed via the u-boot cofniguration system, and can be set in configs/clearfog_defconfig **before running make *clearfog_defconfig***, or **afterwards using *make menuconfig***.
+These settings are exposed via the u-boot cofniguration system, and can be set in configs/clearfog_defconfig **before running make *clearfog_defconfig***, with `./scripts/config`, or **afterwards using *make menuconfig***.
 
 - Defaults: both ports PCIe, SFP at 1Gbps
 
