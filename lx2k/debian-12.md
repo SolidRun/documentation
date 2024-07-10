@@ -24,6 +24,14 @@ Disclaimer: Support is provided by the Debian community. We encourage engaging w
 
   The board uses a marvell 88e2580 octa-port phy which currently has no driver in the kernel.
 
+  SolidRun has a [downstream patch](https://github.com/SolidRun/lx2160a_build/blob/master/patches/linux-LSDK-21.08/0031-net-phy-marvell10g-add-initial-support-for-88x2580.patch) adding support, which has not yet been submitted to lkml.
+
+- Debian `flash-kernel` package is missing db entry for clearfog lx2-lite.
+
+  Debian-Installer cannot make the system bootable during installation.
+
+  Pull-Request open: https://salsa.debian.org/installer-team/flash-kernel/-/merge_requests/61
+
 ## Install U-Boot (One-Time Setup)
 
 To get started, minimal bootable disk images for microSD can be downloaded from [images.solid-run.com](https://images.solid-run.com/LX2k/lx2160a_build).
