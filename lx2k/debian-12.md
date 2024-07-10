@@ -1,6 +1,28 @@
-# Debian 12 on Honeycomb Workstation
+# Debian 12 on SolidRun LX216x platforms
 
-Disclaimer: Debian on Honeycomb is supported by the Debian community. We encourage engaging with them for support.
+Disclaimer: Support is provided by the Debian community. We encourage engaging with them.
+
+## Status
+
+| Platform              | Status      |
+| --------------------- | ----------- |
+| Honeycomb Workstation | Supported   |
+| Clearfog LX2-Lite     | In Progress |
+
+### Open Issues
+
+- [linux-image-6.1.0-17-arm64: please enable support for lx2160a serdes runtime configuration](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1061117):
+
+  Breaks all native network interfaces on LX216x SoCs.
+
+  Closed since 6.8.9-1.
+
+  - http://deb.debian.org/debian/pool/main/l/linux-signed-arm64/linux-image-arm64_6.9.8-1_arm64.deb
+  - http://deb.debian.org/debian/pool/main/l/linux-signed-arm64/linux-image-6.9.8-arm64_6.9.8-1_arm64.deb
+
+- clearfog lx2-lite rj45 ports wrongly report 100Mbps link
+
+  The board uses a marvell 88e2580 octa-port phy which currently has no driver in the kernel.
 
 ## Install U-Boot (One-Time Setup)
 
