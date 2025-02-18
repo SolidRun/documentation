@@ -51,6 +51,13 @@ If you have the optional eMMC on your SOM use these instructions to install Debi
        dd if=spl-imx6-sdhc.bin of=/dev/mmcblk2 bs=1K seek=1 conv=fdatasync
        dd if=u-boot-imx6-sdhc.img of=/dev/mmcblk2 bs=1K seek=69 conv=fdatasync
 
+   Ensure eMMC Data Partition is selected as boot source:
+
+       # EITHER On Linux (command from mmc-utils package)
+       mmc bootpart enable 7 0 /dev/mmcblk2
+       # OR On U-Boot
+       mmc partconf 1 1 7 0
+
 7. Shut the system down with the `poweroff` command
 
 8. Disconnect power source
