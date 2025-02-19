@@ -141,7 +141,7 @@ This sample covers the easiest case where flash-image.bin is available on a fat 
     # initialize spi flash
     sf probe
 
-    # optionally erase
+    # erase
     sf erase 0 0x800000
 
     # finally write loaded file
